@@ -15,9 +15,9 @@ const App = () => {
                     <h1>give feedback</h1>
                 </div>
                 <div>
-                    <button onClick={() => setGood(good + 1)}>Good</button>
-                    <button onClick={() => setNeutral(neutral + 1)}>Neutral</button>
-                    <button onClick={() => setBad(bad + 1)}>Bad</button>
+                    <Button description={'Good'} fn={() => setGood(good + 1)}/>
+                    <Button description={'Neutral'} fn={() => setNeutral(neutral + 1)}/>
+                    <Button description={'Bad'} fn={() => setBad(bad + 1)}/>
                 </div>
                 <Statistics good={good} neutral={neutral} bad={bad}/>
             </div>
@@ -41,16 +41,30 @@ const Statistics = ({good, neutral, bad}) => {
                 <div>
                     <h1>statistics</h1>
                 </div>
-                <div>good {good}</div>
-                <div>neutral {neutral}</div>
-                <div>bad {bad}</div>
-                <div>all {all}</div>
-                <div>average {average ? average : 0}</div>
-                <div>positive {positive ? positive : 0}</div>
+                <StatisticLine text='good' value={good}/>
+                <StatisticLine text='neutral' value={neutral}/>
+                <StatisticLine text='bad' value={bad}/>
+                <StatisticLine text='all' value={all}/>
+                <StatisticLine text='average' value={average}/>
+                <StatisticLine text='positive' value={positive}/>
             </>
         )
     }
 
+}
+
+const StatisticLine = ({text, value}) => {
+    return (
+        <div>
+            {text} {value}
+        </div>
+    )
+}
+
+const Button = ({description, fn}) => {
+    return (
+        <button onClick={fn}>{description}</button>
+    )
 }
 
 export default App
