@@ -15,17 +15,35 @@ const App = () => {
         ? persons.filter(person =>  person.name.toLowerCase().includes(search))
         : persons
 
+    return (
+        <div>
+            <h2>Phonebook</h2>
+            <Filter search={search} setSearch={setSearch}/>
+            <PersonForm persons={persons} setPersons={setPersons} newName={newName} setNewName={setNewName} newPhoneNumber={newPhoneNumber} setNewPhoneNumber={setNewPhoneNumber}/>
+            <h2>Numbers</h2>
+            <Persons personsToShow={personsToShow}/>
+        </div>
+    )
+}
 
+const Filter = ({search, setSearch}) => {
+    const handleSearch = (event) => {
+        setSearch(event.target.value)
+    }
+    return (
+        <div>
+            Filter: <input type="text" value={search} onChange={handleSearch}/>
+        </div>
+    )
+}
+
+const PersonForm = ({persons, setPersons, newName, newPhoneNumber, setNewName, setNewPhoneNumber}) => {
     const handleNameChange = (event) => {
         setNewName(event.target.value)
     }
 
     const handlePhoneNumberChange = (event) => {
         setNewPhoneNumber(event.target.value)
-    }
-
-    const handleSearch = (event) => {
-        setSearch(event.target.value)
     }
 
     const addPerson = (event) => {
@@ -47,8 +65,6 @@ const App = () => {
 
     return (
         <div>
-            <h2>Phonebook</h2>
-            <div>Filter: <input type="text" value={search} onChange={handleSearch}/></div>
             <form onSubmit={addPerson}>
                 <div>name: <input value={newName} onChange={handleNameChange}/></div>
                 <div>number: <input value={newPhoneNumber} onChange={handlePhoneNumberChange}/></div>
@@ -56,7 +72,13 @@ const App = () => {
                     <button type="submit">add</button>
                 </div>
             </form>
-            <h2>Numbers</h2>
+        </div>
+    )
+}
+
+const Persons = ({personsToShow}) => {
+    return (
+        <div>
             <ul>
                 {personsToShow.map(person => <li>{person.name} {person.number}</li>)}
             </ul>
