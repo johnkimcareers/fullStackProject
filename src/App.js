@@ -9,6 +9,7 @@ const App = () => {
     const [newName, setNewName] = useState('')
     const [newPhoneNumber, setNewPhoneNumber] = useState('')
     const [search, setSearch] = useState('')
+    const [addMessage, setAddMessage] = useState(null)
 
     useEffect(() => {
         personService.getAll()
@@ -23,8 +24,9 @@ const App = () => {
     return (
         <div>
             <h2>Phonebook</h2>
+            <Notification message={addMessage}/>
             <Filter search={search} setSearch={setSearch}/>
-            <PersonForm persons={persons} setPersons={setPersons} newName={newName} setNewName={setNewName} newPhoneNumber={newPhoneNumber} setNewPhoneNumber={setNewPhoneNumber}/>
+            <PersonForm persons={persons} setPersons={setPersons} newName={newName} setNewName={setNewName} newPhoneNumber={newPhoneNumber} setNewPhoneNumber={setNewPhoneNumber} addMessage={addMessage} setAddMessage={setAddMessage}/>
             <h2>Numbers</h2>
             <Persons personsToShow={personsToShow} setPersons={setPersons}/>
         </div>
@@ -42,7 +44,7 @@ const Filter = ({search, setSearch}) => {
     )
 }
 
-const PersonForm = ({persons, setPersons, newName, newPhoneNumber, setNewName, setNewPhoneNumber}) => {
+const PersonForm = ({persons, setPersons, newName, newPhoneNumber, setNewName, setNewPhoneNumber, addMessage, setAddMessage}) => {
     const handleNameChange = (event) => {
         setNewName(event.target.value)
     }
@@ -69,6 +71,10 @@ const PersonForm = ({persons, setPersons, newName, newPhoneNumber, setNewName, s
                 setPersons(persons.concat(returnedPerson))
                 setNewName('')
                 setNewPhoneNumber('')
+                setAddMessage(`Successfully added ${name}`)
+                setTimeout(() => {
+                    setAddMessage(null)
+                }, 5000)
             })
     }
     return (
@@ -106,6 +112,18 @@ const Button = ({id, persons, setPersons}) => {
         <>
             <button onClick={remove}>delete</button>
         </>
+    )
+}
+
+const Notification = ({message}) => {
+    if (message === null) {
+        return null
+    }
+
+    return (
+        <div className='add'>
+            {message}
+        </div>
     )
 }
 
