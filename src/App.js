@@ -1,16 +1,21 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
+import personService from './services/persons'
+
 
 const App = () => {
     const [persons, setPersons] = useState([
-        { name: 'Arto Hellas', number: '040-123456', id: 1 },
-        { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
-        { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
-        { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 }
     ])
     const [newName, setNewName] = useState('')
     const [newPhoneNumber, setNewPhoneNumber] = useState('')
     const [search, setSearch] = useState('')
 
+    useEffect(() => {
+        personService.getAll()
+            .then(intialPersons => {
+                setPersons(intialPersons)
+            })
+    }, [])
     const personsToShow = search
         ? persons.filter(person =>  person.name.toLowerCase().includes(search))
         : persons
@@ -21,7 +26,7 @@ const App = () => {
             <Filter search={search} setSearch={setSearch}/>
             <PersonForm persons={persons} setPersons={setPersons} newName={newName} setNewName={setNewName} newPhoneNumber={newPhoneNumber} setNewPhoneNumber={setNewPhoneNumber}/>
             <h2>Numbers</h2>
-            <Persons personsToShow={personsToShow}/>
+            <Persons personsToShow={personsToShow} setPersons={setPersons}/>
         </div>
     )
 }
@@ -58,11 +63,14 @@ const PersonForm = ({persons, setPersons, newName, newPhoneNumber, setNewName, s
             name: name,
             number: number
         }
-        setPersons(persons.concat(newPerson))
-        setNewName('')
-        setNewPhoneNumber('')
+        personService
+            .create(newPerson)
+            .then(returnedPerson => {
+                setPersons(persons.concat(returnedPerson))
+                setNewName('')
+                setNewPhoneNumber('')
+            })
     }
-
     return (
         <div>
             <form onSubmit={addPerson}>
@@ -76,13 +84,28 @@ const PersonForm = ({persons, setPersons, newName, newPhoneNumber, setNewName, s
     )
 }
 
-const Persons = ({personsToShow}) => {
+const Persons = ({personsToShow, setPersons}) => {
     return (
         <div>
             <ul>
-                {personsToShow.map(person => <li>{person.name} {person.number}</li>)}
+                {personsToShow.map(person => <li>{person.name} {person.number} <Button id={person.id} persons={personsToShow} setPersons={setPersons}/></li>)}
             </ul>
         </div>
+    )
+}
+
+const Button = ({id, persons, setPersons}) => {
+    const remove = () => {
+        personService.remove(id)
+            .then(removedPerson => {
+                const updatedPersons = persons.filter(person => person.id !== id)
+                setPersons(updatedPersons)
+            })
+    }
+    return (
+        <>
+            <button onClick={remove}>delete</button>
+        </>
     )
 }
 
