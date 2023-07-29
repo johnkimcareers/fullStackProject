@@ -9,13 +9,15 @@ const App = () => {
     const [newName, setNewName] = useState('')
     const [newPhoneNumber, setNewPhoneNumber] = useState('')
     const [search, setSearch] = useState('')
-    const [addMessage, setAddMessage] = useState(null)
+    const [addMessage, setAddMessage] = useState({message: null, type: 'normal'})
+
 
     useEffect(() => {
         personService.getAll()
             .then(intialPersons => {
                 setPersons(intialPersons)
             })
+
     }, [])
     const personsToShow = search
         ? persons.filter(person =>  person.name.toLowerCase().includes(search))
@@ -24,11 +26,11 @@ const App = () => {
     return (
         <div>
             <h2>Phonebook</h2>
-            <Notification message={addMessage}/>
+            <Notification message={addMessage.message} type={addMessage.type}/>
             <Filter search={search} setSearch={setSearch}/>
             <PersonForm persons={persons} setPersons={setPersons} newName={newName} setNewName={setNewName} newPhoneNumber={newPhoneNumber} setNewPhoneNumber={setNewPhoneNumber} addMessage={addMessage} setAddMessage={setAddMessage}/>
             <h2>Numbers</h2>
-            <Persons personsToShow={personsToShow} setPersons={setPersons}/>
+            <Persons personsToShow={personsToShow} setPersons={setPersons} setAddMessage={setAddMessage} addMessage={addMessage}/>
         </div>
     )
 }
@@ -71,9 +73,15 @@ const PersonForm = ({persons, setPersons, newName, newPhoneNumber, setNewName, s
                 setPersons(persons.concat(returnedPerson))
                 setNewName('')
                 setNewPhoneNumber('')
-                setAddMessage(`Successfully added ${name}`)
+                setAddMessage({
+                    ...addMessage,
+                    message: `Successfully added ${name}`
+                })
                 setTimeout(() => {
-                    setAddMessage(null)
+                    setAddMessage({
+                        ...addMessage,
+                        message: null
+                    })
                 }, 5000)
             })
     }
@@ -90,22 +98,30 @@ const PersonForm = ({persons, setPersons, newName, newPhoneNumber, setNewName, s
     )
 }
 
-const Persons = ({personsToShow, setPersons}) => {
+const Persons = ({personsToShow, setPersons, setAddMessage, addMessage}) => {
     return (
         <div>
             <ul>
-                {personsToShow.map(person => <li>{person.name} {person.number} <Button id={person.id} persons={personsToShow} setPersons={setPersons}/></li>)}
+                {personsToShow.map(person => <li>{person.name} {person.number} <Button id={person.id} persons={personsToShow} setPersons={setPersons} setAddMessage={setAddMessage} addMessage={addMessage}/></li>)}
             </ul>
         </div>
     )
 }
 
-const Button = ({id, persons, setPersons}) => {
+const Button = ({id, persons, setPersons, setAddMessage, addMessage}) => {
     const remove = () => {
         personService.remove(id)
             .then(removedPerson => {
                 const updatedPersons = persons.filter(person => person.id !== id)
                 setPersons(updatedPersons)
+            })
+            .catch(err => {
+                const removedPerson = persons.filter(person => person.id === id)[0]
+                setAddMessage({
+                    ...addMessage,
+                    message: `${removedPerson.name} was already removed`,
+                    type: 'error'
+                })
             })
     }
     return (
@@ -115,13 +131,28 @@ const Button = ({id, persons, setPersons}) => {
     )
 }
 
-const Notification = ({message}) => {
+const Notification = ({message, type}) => {
     if (message === null) {
         return null
     }
 
+    const style = {
+        background: 'lightgrey',
+        fontSize: 20,
+        borderStyle: 'solid',
+        borderRadius: 5,
+        padding: 10,
+        marginBottom: 10
+    }
+
+    if (type === 'normal') {
+        style.color = 'green'
+    } else if (type === 'error') {
+        style.color = 'red'
+    }
+
     return (
-        <div className='add'>
+        <div style={style}>
             {message}
         </div>
     )
