@@ -23,6 +23,8 @@ const App = () => {
         ? persons.filter(person =>  person.name.toLowerCase().includes(search))
         : persons
 
+    console.log(personsToShow)
+
     return (
         <div>
             <h2>Phonebook</h2>
@@ -57,33 +59,49 @@ const PersonForm = ({persons, setPersons, newName, newPhoneNumber, setNewName, s
 
     const addPerson = (event) => {
         event.preventDefault()
-        if (persons.find(person => person.name === newName)) {
-            alert(`${newName} is already added to the phonebook`)
-            return
-        }
-        const name = newName
-        const number = newPhoneNumber
-        const newPerson = {
-            name: name,
-            number: number
-        }
-        personService
-            .create(newPerson)
-            .then(returnedPerson => {
-                setPersons(persons.concat(returnedPerson))
-                setNewName('')
-                setNewPhoneNumber('')
-                setAddMessage({
-                    ...addMessage,
-                    message: `Successfully added ${name}`
+        const searchedPerson = persons.find(person => person.name === newName)
+        if (searchedPerson) {
+            const updatedPerson = {
+                ...searchedPerson,
+                name: newName,
+                number: newPhoneNumber
+            }
+            personService.update(updatedPerson)
+                .then(response => {
+                    alert(`${response.name} has been updated`)
+                    const updatedPersons = persons.map(person => {
+                        if (person.id === updatedPerson.id) {
+                            return updatedPerson
+                        }
+                        return person
+                    })
+                    setPersons(updatedPersons)
                 })
-                setTimeout(() => {
+        } else {
+            const name = newName
+            const number = newPhoneNumber
+            const newPerson = {
+                name: name,
+                number: number
+            }
+            personService
+                .create(newPerson)
+                .then(returnedPerson => {
+                    setPersons(persons.concat(returnedPerson))
+                    setNewName('')
+                    setNewPhoneNumber('')
                     setAddMessage({
                         ...addMessage,
-                        message: null
+                        message: `Successfully added ${name}`
                     })
-                }, 5000)
-            })
+                    setTimeout(() => {
+                        setAddMessage({
+                            ...addMessage,
+                            message: null
+                        })
+                    }, 5000)
+                })
+        }
     }
     return (
         <div>
